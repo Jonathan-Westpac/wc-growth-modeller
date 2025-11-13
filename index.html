@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Westpac Cash Impact & Growth Modeller</title>
+<style>
+#gi-rows input[type="number"] {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13px;
+  background: #fff;
+}
+#gi-rows input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(200,16,30,0.15);
+}
+.q-title .info {
+  font-size: 12px;
+  margin-left: 6px;
+  color: var(--accent);
+  cursor: help;
+  vertical-align: middle;
+}
+.q-title .info:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  white-space: normal;
+  width: 200px;
+  z-index: 9999;
+  transform: translate(8px, -4px);
+}
+.info-icon {
+  cursor: help;
+  font-size: 13px;
+  margin-left: 4px;
+  color: var(--accent);
+  vertical-align: middle;
+}
+  :root{
+    --accent:#C8102E;
+    --accent-hover:#A00D24;
+    --muted:#6b7280;
+    --ink:#111827;
+    --card:#fff;
+    --shadow:0 8px 20px rgba(16,24,40,0.06);
+    --radius:12px;
+    --impact-bg:#f3fdfa;
+    --impact-border:#d1fae5;
+    --impact-text:#047857;
+    --bar-fin-start:#94A3B8;
+    --bar-fin-end:#64748B;
+    --bar-net-start:#059669;
+    --bar-net-end:#047857;
+    --soft-grey:#F9FAFB;
+  }
+  
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    padding:28px;
+    color:var(--ink);
+    background:#f6f7f9;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+  }
+
+  .container{max-width:1200px;margin:0 auto;display:grid;gap:20px}
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+
+  .header{
+    background:linear-gradient(135deg,#F3F4F6 0%,#E5E7EB 100%);
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:20px 24px;
+    border-left:4px solid var(--accent);
+  }
+  .header-left{display:flex;align-items:center;gap:16px}
+  .header-left h1{margin:0 0 6px 0;font-size:22px;font-weight:700}
+  .header-left .lead{margin:0;color:#374151;font-size:13px;line-height:1.5}
+
+  h3{
+    margin:0 0 16px 0;
+    font-size:16px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  h3::before{
+    content:"";
+    width:4px;
+    height:20px;
+    background:var(--accent);
+    border-radius:2px;
+  }
+
+  .grid{display:grid;gap:16px}
+  .grid.cols-5{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .grid.cols-4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  
+  .input-group{display:flex;flex-direction:column;gap:6px}
+  label{font-size:13px;color:#6b7280;font-weight:600}
+  input[type="text"],input[type="number"]{
+    padding:12px;
+    border-radius:8px;
+    border:2px solid #e6e6eb;
+    font-size:14px;
+    width:100%;
+    background:#fff;
+    font-family:inherit;
+  }
+  input[readonly]{background:#f3f4f6;color:#4b5563}
+  input:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(200,16,30,0.08);
+  }
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .kpi{padding:16px;border-radius:12px;color:#fff}
+  .kpi.dio{background:linear-gradient(135deg,#6d28d9,#7c3aed)}
+  .kpi.dso{background:linear-gradient(135deg,#0ea5ff,#0284c7)}
+  .kpi.dpo{background:linear-gradient(135deg,#10b981,#059669)}
+  .kpi.ccc{background:linear-gradient(135deg,#f97316,#fb923c)}
+  .kpi.cash{background:linear-gradient(135deg,#60a5fa,#2563eb)}
+  .label{font-size:12px;opacity:.95;margin-bottom:8px}
+  .value{font-size:20px;font-weight:700}
+
+  .has-tip{position:relative;cursor:help}
+  .has-tip::after{
+    content:attr(data-tip);
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%);
+    opacity:0;
+    pointer-events:none;
+    min-width:220px;
+    white-space:normal;
+    background:#111827;
+    color:#fff;
+    font-size:12px;
+    line-height:1.5;
+    border-radius:8px;
+    padding:10px 12px;
+    z-index:20;
+    transition:opacity 0.2s;
+  }
+  .has-tip:hover::after{opacity:1}
+
+  .quick-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .quick-item{
+    border:2px solid #eee;
+    border-radius:12px;
+    padding:16px;
+    background:#fff;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .quick-item:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .quick-item.active{
+    border-color:var(--accent);
+    background:linear-gradient(135deg,#fff5f5 0%,#fff 100%);
+  }
+  .q-title{font-weight:700;font-size:15px;margin-bottom:8px}
+  .muted{color:#6b7280;font-size:13px}
+
+  .impact{
+    background:var(--impact-bg);
+    border:2px solid var(--impact-border);
+    padding:16px;
+    border-radius:12px;
+  }
+  .impact h4{margin:0 0 12px 0;color:var(--impact-text);font-size:15px}
+  .impact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .impact-item{background:rgba(255,255,255,0.6);padding:12px;border-radius:8px}
+
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{font-family:inherit;font-size:14px;font-weight:600;transition:all 0.2s}
+  button.primary{
+    background:var(--accent);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:10px;
+    border:0;
+    cursor:pointer;
+  }
+  button.primary:hover{background:var(--accent-hover)}
+  button.ghost{
+    background:transparent;
+    border:2px solid #e6e6eb;
+    padding:11px 18px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .badge{
+    background:#10b981;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+  }
+
+#presetButtons .ghost {
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+#presetButtons .ghost:hover {
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  thead{background:var(--soft-grey)}
+  th,td{padding:12px;border-bottom:1px solid #f1f1f4}
+  th{color:#6b7280;font-weight:700;font-size:12px;text-transform:uppercase}
+  th.num,td.right{text-align:right}
+  tbody tr:hover{background:#F9FAFB}
+  button.delete-btn{background:none;border:0;color:#ef4444;cursor:pointer;font-size:18px}
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,0.4);
+    z-index:100;
+  }
+  .overlay.open{display:flex}
+  .overlay .panel{
+    width:min(1100px,92vw);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--card);
+    border-radius:16px 16px 0 0;
+    box-shadow:0 20px 40px rgba(0,0,0,.3);
+    transform:translateY(100%);
+    transition:transform 0.4s;
+  }
+  .overlay.open .panel{transform:translateY(0)}
+  .overlay .panel .header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    border-top:4px solid #10B981;
+    background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);
+  }
+  .overlay .panel .content{padding:20px}
+
+  .two-cols{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+  .mult-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+  .mult-item{display:flex;flex-direction:column;gap:6px;background:#fff;border:2px solid #e5e7eb;border-radius:8px;padding:10px}
+  .mult-item label{margin:0;font-size:13px}
+  .mult-item input{width:100%;padding:8px;font-size:14px;border-radius:6px;border:1px solid #e6e6eb}
+
+  .bars-card{background:var(--soft-grey);border-radius:12px;padding:16px}
+  .bars-headings{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .bars-headings div{text-align:center;color:#374151;font-weight:700;font-size:13px}
+  .bar-group{display:grid;gap:16px}
+  .bar-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
+  .bar-label{grid-column:1/-1;font-size:13px;color:#374151;font-weight:600;margin-bottom:4px}
+  .bar-bg{width:100%;height:16px;background:#eef0f3;border-radius:8px;position:relative;overflow:hidden;cursor:pointer}
+  .bar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--bar-net-start),var(--bar-net-end));transition:width 0.3s}
+  .bar.fin{background:linear-gradient(90deg,var(--bar-fin-start),var(--bar-fin-end))}
+  .bar-bg:hover::after { display: none; }
+  .bar-bg:hover::after{display:block}
+.bar, .bar.fin {
+  pointer-events: none; /* allow parent to capture hover */
+}
+  @media(max-width:1000px){
+    .grid.cols-5,.grid.cols-4{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .quick-list,.impact-grid,.two-cols,.mult-row{grid-template-columns:1fr}
+  }
+/* Make multiplier inputs fill the cell */
+.mult-input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 0; /* Remove auto centering */
+}
+
+/* --- Allocation input with in-box % symbol --- */
+.alloc-wrapper {
+  position: relative;
+  display: block;
+  width: 100%; /* Fill the cell */
+}
+.alloc-input {
+  text-align: right;
+  padding-right: 18px;
+  width: 100%; /* Fill the wrapper/cell */
+  box-sizing: border-box;
+  margin: 0; /* Remove auto centering */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.alloc-input::-webkit-outer-spin-button,
+.alloc-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.alloc-symbol {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* Center numeric inputs and remove arrows in Use of Cash table (updated for full width) */
+#gi-rows td:nth-child(2) input,
+#gi-rows td:nth-child(3) input {
+  text-align: center !important;
+  margin: 0;
+  display: block;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+#gi-rows td:nth-child(2) input::-webkit-outer-spin-button,
+#gi-rows td:nth-child(2) input::-webkit-inner-spin-button,
+#gi-rows td:nth-child(3) input::-webkit-outer-spin-button,
+#gi-rows td:nth-child(3) input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* --- Allocation input with in-box % symbol --- */
+.alloc-input {
+  text-align: right;
+  padding-right: 18px;
+  width: 80px;
+  display: block;
+  margin: 0 auto;
+  -moz-appearance: textfield; /* Keep for Firefox */
+  appearance: textfield; /* Add for modern browsers (Chrome 84+, Edge 84+, Safari 15.4+) */
+}
+.alloc-input::-webkit-outer-spin-button,
+.alloc-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none; /* Add for modern browsers */
+  margin: 0;
+}
+.alloc-symbol {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 13px;
+  pointer-events: none;
+}
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+/* --- Multiplier modal visual style --- */
+#multiplierPopup {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+#multiplierPopup.open {
+  display: flex;
+  animation: fadeIn 0.2s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+#tooltip {
+  white-space: pre-line;
+  max-width: 280px;
+}
+/* Allow wrapping on labels with info icons */
+.wrap-label {
+  display: inline-flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  line-height: 1.4;
+  gap: 4px;
+  max-width: 140px; /* adjust to match layout */
+  white-space: normal; /* ensure wrapping allowed */
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- === Multiplier Popup (top-level modal) === -->
+<div id="multiplierPopup" class="overlay" style="z-index:99999; background:rgba(0,0,0,0.55);">
+  <div class="panel"
+       style="max-width:420px;
+              border-top:4px solid var(--accent);
+              background:#fff;
+              border-radius:16px;
+              margin:auto;
+              transform:translateY(0);
+              transition:opacity 0.25s ease;
+              box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+    <div class="card header" style="background:#fff;">
+      <h3 style="margin:0;">Set Default Multipliers</h3>
+    </div>
+    <div class="content" style="padding:20px;">
+      <div id="multiplierFields"></div>
+      <div style="margin-top:16px;text-align:right;">
+        <button id="saveMultipliersBtn" class="primary">Save</button>
+        <button id="cancelMultipliersBtn" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <div class="card header">
+    <div class="header-left">
+      <div>
+        <h1>Cash Impact Analyser</h1>
+        <p class="lead">Model how optimising your Cash Conversion Cycle (CCC) frees up cash to remove growth constraints.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Current Business Metrics</h3>
+<div id="presetButtons" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+  <button class="ghost" onclick="setBusinessPreset('Labour Hire')">Labour Hire</button>
+  <button class="ghost" onclick="setBusinessPreset('Transport')">Transport</button>
+  <button class="ghost" onclick="setBusinessPreset('Wholesale')">Wholesale</button>
+  <button class="ghost" onclick="setBusinessPreset('Manufacturing')">Manufacturing</button>
+</div>
+    <div class="grid cols-5">
+      <div class="input-group">
+        <label for="revenue">Revenue (AUD)</label>
+        <input id="revenue" type="text" value="$10,000,000"/>
+      </div>
+      <div class="input-group">
+        <label for="cogs">COGS (AUD)</label>
+        <input id="cogs" type="text" value="$8,000,000"/>
+      </div>
+      <div class="input-group">
+        <label for="inventory">Inventory</label>
+        <input id="inventory" type="text" value="$950,000"/>
+      </div>
+      <div class="input-group">
+        <label for="receivables">Receivables</label>
+        <input id="receivables" type="text" value="$1,700,000"/>
+      </div>
+      <div class="input-group">
+        <label for="payables">Payables</label>
+        <input id="payables" type="text" value="$900,000"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="kpis">
+      <div class="kpi dio">
+        <div class="label">
+          <span class="has-tip" data-tip="DIO (Days Inventory Outstanding) = (Inventory ÷ COGS) × 365">DIO</span>
+        </div>
+        <div id="kpi-dio" class="value">—</div>
+      </div>
+      <div class="kpi dso">
+        <div class="label">
+          <span class="has-tip" data-tip="DSO (Days Sales Outstanding) = (Receivables ÷ Revenue) × 365">DSO</span>
+        </div>
+        <div id="kpi-dso" class="value">—</div>
+      </div>
+      <div class="kpi dpo">
+        <div class="label">
+          <span class="has-tip" data-tip="DPO (Days Payables Outstanding) = (Payables ÷ COGS) × 365">DPO</span>
+        </div>
+        <div id="kpi-dpo" class="value">—</div>
+      </div>
+      <div class="kpi ccc">
+        <div class="label">
+          <span class="has-tip" data-tip="CCC (Cash Conversion Cycle) = DIO + DSO − DPO">CCC</span>
+        </div>
+        <div id="kpi-ccc" class="value">—</div>
+      </div>
+      <div class="kpi cash">
+        <div class="label">
+          <span class="has-tip" data-tip="Cash Tied Up = CCC × (COGS ÷ 365)">Cash Tied Up</span>
+        </div>
+        <div id="kpi-cash" class="value">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Quick Scenarios</h3>
+    <div class="quick-list" id="quickScenariosRow"></div>
+  </div>
+
+  <div class="card">
+    <h3>Build Your Scenario</h3>
+    <div class="grid cols-4">
+      <div class="input-group">
+        <label for="scenario-dio">DIO Δ (days)</label>
+        <input id="scenario-dio" type="number" value="0"/>
+        <div class="muted">Negative → faster turnover</div>
+      </div>
+      <div class="input-group">
+        <label for="scenario-dso">DSO Δ (days)</label>
+        <input id="scenario-dso" type="number" value="0"/>
+        <div class="muted">Negative → faster collections</div>
+      </div>
+      <div class="input-group">
+        <label for="scenario-dpo">DPO Δ (days)</label>
+        <input id="scenario-dpo" type="number" value="0"/>
+        <div class="muted">Positive → extend supplier terms</div>
+      </div>
+      <div class="input-group">
+        <label for="scenario-desc">Description</label>
+        <input id="scenario-desc" type="text" placeholder="e.g., Trade Finance"/>
+      </div>
+    </div>
+
+    <div class="impact" style="margin-top:20px">
+      <h4>💰 Projected Impact</h4>
+      <div class="impact-grid">
+        <div class="impact-item">
+          <div class="muted">New CCC</div>
+          <div id="impact-new-ccc" class="value">—</div>
+          <div id="impact-ccc-delta" class="muted">—</div>
+        </div>
+        <div class="impact-item">
+          <div class="muted">Cash Freed</div>
+          <div id="impact-cash-freed" class="value" style="color:var(--impact-text)">—</div>
+          <div class="muted">from working capital</div>
+        </div>
+        <div class="impact-item">
+          <div class="muted">New Working Capital</div>
+          <div id="impact-new-wc" class="value">—</div>
+          <div id="impact-old-wc" class="muted">—</div>
+        </div>
+        <div class="impact-item">
+          <div class="muted">Cash Impact</div>
+          <div id="impact-cash-impact" class="value">—</div>
+          <div id="impact-cash-direction" class="muted">—</div>
+        </div>
+      </div>
+<!-- Tooltip explaining difference between Cash Freed and Cash Impact -->
+<div style="grid-column:1 / -1; margin-top:8px; text-align:right; font-size:12px; color:#6b7280;">
+  <span class="has-tip" 
+        data-tip="💡 Cash Freed shows the reduction in working capital (Inventory + Receivables – Payables). 
+Cash Impact shows the timing benefit — how much liquidity is released because the cash conversion cycle is shorter. 
+They differ when timing changes don’t move working capital balances in the same proportion.">
+    💡 What’s the difference?
+  </span>
+</div>
+      <div class="btn-row" style="margin-top:16px">
+        <button id="saveScenarioBtn" class="primary">💾 Save Scenario</button>
+        <button id="resetScenarioBtn" class="ghost">🔄 Reset</button>
+        <button id="openGrowthBtn" class="primary" style="margin-left:auto">Next Step → Model Growth Impact</button>
+        <span class="badge" id="baselineBadge">✓ Baseline ready</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="savedSection" style="display:none;">
+    <h3>Saved Scenarios</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th class="num">CCC Change</th>
+          <th class="num">Cash Freed</th>
+          <th class="num">New CCC</th>
+          <th class="num">New Working Capital</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="scenariosBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<div id="growthOverlay" class="overlay">
+  <div class="panel">
+    <div class="card header">
+      <div class="header-left">
+        <div>
+          <button id="closeGrowthBtn" class="ghost" style="margin-bottom:8px">← Back</button>
+          <h1 style="margin:0 0 6px 0">Growth Impact Modeller</h1>
+          <p class="lead">Use freed cash to remove constraints and grow sales and profitability.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card">
+        <h3>Assumptions</h3>
+        <div class="grid cols-4">
+          <div class="input-group">
+            <label for="gi-cash">Cash Freed (AUD)</label>
+            <input id="gi-cash" type="text" value="$0"/>
+          </div>
+          <div class="input-group">
+            <label for="gi-rate">Finance Cost (% p.a.)</label>
+            <input id="gi-rate" type="number" value="10" step="0.1" onchange="computeGrowth()" />
+
+          </div>
+          <div class="input-group">
+            <label for="gi-term">Term (months)</label>
+            <input id="gi-term" type="number" value="12" step="1" oninput="computeGrowth()" />
+          </div>
+          <div class="input-group">
+            <label for="gi-gm">Gross Margin (%)</label>
+            <input id="gi-gm" type="number" value="33.3" step="0.1" readonly/>
+	<label for="gi-term" class="wrap-label">
+  Term (months)
+  <span class="info-icon" 
+        title="The Net Return values shown in the bars reflect this selected term length.">
+    ℹ️
+  </span>
+</label>
+          </div>
+        </div>
+      </div>
+<div class="two-cols" style="grid-template-columns:65% 35%">
+  <div class="card">
+    <h3 style="display:flex;justify-content:space-between;align-items:center;">
+  Use of Cash Allocations
+  <button id="setMultipliersBtn" class="ghost" style="font-size:13px;padding:6px 10px;">⚙️ Set Multipliers</button>
+</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Use of Cash</th>
+          <th style="width:180px;text-align:center;">Allocation</th>
+          <th class="num">Net Return</th>
+        </tr>
+      </thead>
+      <tbody id="gi-rows-simple"></tbody>
+    </table>
+    <div id="alloc-note" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card bars-card">
+    <div class="bars-headings"><div>Net Return</div></div>
+    <div id="bars-simple" class="bar-group"></div>
+    <div class="impact" style="margin-top:12px">
+      <div id="gi-summary" style="color:var(--impact-text);font-weight:600"></div>
+    </div>
+  </div>
+</div>
+<script>
+/* ---------------------------
+   Utility & formatting
+----------------------------*/
+const $ = id => document.getElementById(id);
+const parseMoney = s => Number(String(s).replace(/[^0-9.-]/g,'')) || 0;
+const fmtAUD = n => Number.isFinite(n) ? '$' + Math.round(n).toLocaleString('en-AU') : '—';
+
+let scenarios = [];
+let activeQuick = null;
+let lastImpact = { cashFreed: 0 };
+
+/* ---------------------------
+   Input formatting helpers
+----------------------------*/
+function wireMoney(el){
+  el.addEventListener('input', updateAll);
+  el.addEventListener('focus', ()=>{
+    const val = parseMoney(el.value);
+    if(val) el.value = String(val);
+  });
+  el.addEventListener('blur', ()=>{
+    el.value = fmtAUD(parseMoney(el.value));
+  });
+}
+
+/* ---------------------------
+   Baseline metrics
+----------------------------*/
+function getBaseline(){
+  return {
+    revenue: parseMoney($('revenue').value),
+    cogs: parseMoney($('cogs').value),
+    inventory: parseMoney($('inventory').value),
+    receivables: parseMoney($('receivables').value),
+    payables: parseMoney($('payables').value)
+  };
+}
+
+function calcMetrics(b){
+  const dio = b.cogs>0 ? (b.inventory/b.cogs)*365 : 0;
+  const dso = b.revenue>0 ? (b.receivables/b.revenue)*365 : 0;
+  const dpo = b.cogs>0 ? (b.payables/b.cogs)*365 : 0;
+  const ccc = dio + dso - dpo;
+  const workingCapital = b.inventory + b.receivables - b.payables;
+  const cashTiedUp = ccc * (b.cogs/365);
+  return {dio,dso,dpo,ccc,workingCapital,cashTiedUp,rev:b.revenue,cogs:b.cogs};
+}
+
+/* ---------------------------
+   Impact calculation
+----------------------------*/
+function calcImpact(m, b, dDIO, dDSO, dDPO){
+  const newDIO = m.dio + dDIO;
+  const newDSO = m.dso + dDSO;
+  const newDPO = m.dpo + dDPO;
+  const newCCC = newDIO + newDSO - newDPO;
+  const newInv = b.cogs>0 ? (newDIO/365)*b.cogs : 0;
+  const newRec = b.revenue>0 ? (newDSO/365)*b.revenue : 0;
+  const newPay = b.cogs>0 ? (newDPO/365)*b.cogs : 0;
+  const newWorkingCapital = newInv + newRec - newPay;
+  const cashFreed = m.workingCapital - newWorkingCapital;
+  const cashImpact = m.cashTiedUp - (newCCC * (b.cogs/365));
+  return {newCCC, newWorkingCapital, cashFreed, cashImpact};
+}
+
+/* ---------------------------
+   KPI & Impact Updates
+----------------------------*/
+function updateKPIs(m){
+  $('kpi-dio').textContent = Math.round(m.dio) + ' days';
+  $('kpi-dso').textContent = Math.round(m.dso) + ' days';
+  $('kpi-dpo').textContent = Math.round(m.dpo) + ' days';
+  $('kpi-ccc').textContent = Math.round(m.ccc) + ' days';
+  $('kpi-cash').textContent = fmtAUD(m.workingCapital);
+}
+
+function updateImpact(b, m){
+  const dDIO = +$('scenario-dio').value || 0;
+  const dDSO = +$('scenario-dso').value || 0;
+  const dDPO = +$('scenario-dpo').value || 0;
+  const imp = calcImpact(m, b, dDIO, dDSO, dDPO);
+  $('impact-new-ccc').textContent = Math.round(imp.newCCC) + ' days';
+  const delta = Math.round(imp.newCCC - m.ccc);
+  $('impact-ccc-delta').textContent = (delta<0?'↓ ':'↑ ') + Math.abs(delta) + ' days vs baseline';
+  $('impact-ccc-delta').style.color = delta<0 ? 'var(--impact-text)' : '#ef4444';
+  $('impact-cash-freed').textContent = fmtAUD(imp.cashFreed);
+  $('impact-new-wc').textContent = fmtAUD(imp.newWorkingCapital);
+  $('impact-old-wc').textContent = 'vs ' + fmtAUD(m.workingCapital);
+  $('impact-cash-impact').textContent = fmtAUD(Math.abs(imp.cashImpact));
+  $('impact-cash-impact').style.color = imp.cashImpact>0 ? 'var(--impact-text)' : '#ef4444';
+  $('impact-cash-direction').textContent = imp.cashImpact>0 ? 'freed up' : 'tied up';
+  lastImpact = imp;
+  $('baselineBadge').textContent = imp.cashFreed>0 ? `💰 Cash Freed: ${fmtAUD(imp.cashFreed)}` : '✓ Baseline ready';
+}
+
+function updateGrossMargin(b){
+  const gm = b.revenue>0 ? ((b.revenue - b.cogs)/b.revenue)*100 : 0;
+  $('gi-gm').value = gm.toFixed(1);
+}
+
+function refreshKPIs() {
+  // whatever you use to update the KPI cards:
+  // e.g. updateKPIcards(); or recomputeSummary(); or renderDashboard();
+  if (typeof updateKPICards === "function") updateKPICards();
+}
+
+/* ===== Quick Scenarios ===== */
+function renderQuickScenarios(m){
+  const row=$('quickScenariosRow'); row.innerHTML='';
+  const invFinDSODelta = -(Number.isFinite(m.dso) ? Math.round(m.dso*0.8) : 0);
+  const items = [
+    {
+      name:'Invoice Finance',
+      dio:0,
+      dso:invFinDSODelta,
+      dpo:0,
+      subtitle:`DSO ${invFinDSODelta} days`,
+      info:'DSO × 80% advance rate'
+    },
+    {
+      name:'Trade Finance',
+      dio:(Number.isFinite(m.dio)&&Number.isFinite(m.dpo))?Math.round(-m.dio+m.dpo):0,
+      dso:(Number.isFinite(m.dso)&&Number.isFinite(m.cogs)&&Number.isFinite(m.rev)&&m.rev!==0)
+          ?Math.round(m.dso*((m.cogs/m.rev)-1)):0,
+      dpo:null,
+      subtitle:`DIO ${(Number.isFinite(m.dio)&&Number.isFinite(m.dpo))?Math.round(-m.dio+m.dpo):0} days, DSO ${(Number.isFinite(m.dso)&&Number.isFinite(m.cogs)&&Number.isFinite(m.rev)&&m.rev!==0)?Math.round(m.dso*((m.cogs/m.rev)-1)):0} days`,
+      info:'DIO = (−DIO + DPO), DSO = DSO × ((COGS ÷ Revenue) − 1)'
+    },
+    { name:'Faster Collections', dio:0, dso:-10, dpo:0, subtitle:'DSO -10 days' },
+    { name:'Inventory Optimisation', dio:-5, dso:0, dpo:0, subtitle:'DIO -5 days' },
+    { name:'Operational Efficiency', dio:-3, dso:-5, dpo:0, subtitle:'DIO -3, DSO -5' },
+    { name:'Combined Working Capital Push', dio:-5, dso:-5, dpo:5, subtitle:'DIO -5, DSO -5, DPO +5' }
+  ];
+  items.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className='quick-item'+(activeQuick===i?' active':'');
+    const title = `<div class="q-title">${q.name}${(q.info?`<span class="info" data-tip="${q.info}">ℹ️</span>`:'')}</div>`;
+    div.innerHTML = title + `<div class="muted" style="margin-top:6px">${q.subtitle}</div>`;
+    div.addEventListener('click',()=>{
+      activeQuick=i;
+      $('scenario-dio').value=q.dio; $('scenario-dso').value=q.dso; $('scenario-dpo').value=q.dpo; $('scenario-desc').value=q.name;
+      renderQuickScenarios(m);
+      const b=getBaseline(); const m2=calcMetrics(b); updateImpact(b,m2);
+    });
+    row.appendChild(div);
+  });
+}
+
+/* ---------------------------
+   Scenarios Table
+----------------------------*/
+function renderScenariosTable(m){
+  const body=$('scenariosBody');
+  body.innerHTML='';
+  $('savedSection').style.display=scenarios.length?'block':'none';
+  scenarios.forEach((s,idx)=>{
+    const delta=Math.round(s.newCCC - m.ccc);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${s.description}</td>
+      <td class="right" style="color:${delta<0?'var(--impact-text)':'#ef4444'};font-weight:700">
+        ${delta<0?'↓ ':'↑ '}${Math.abs(delta)} days
+      </td>
+      <td class="right" style="color:var(--impact-text);font-weight:700">${fmtAUD(s.cashFreed)}</td>
+      <td class="right">${Math.round(s.newCCC)} days</td>
+      <td class="right">${fmtAUD(s.newWorkingCapital)}</td>
+      <td class="right"><button class="delete-btn" onclick="deleteScenario(${idx})">🗑️</button></td>`;
+    body.appendChild(tr);
+  });
+}
+window.deleteScenario = i => {scenarios.splice(i,1);updateAll();};
+
+
+/* ---------------------------
+   Overlay (Growth Modeller)
+----------------------------*/
+function openOverlay(){
+  const cash=lastImpact.cashFreed>0?lastImpact.cashFreed:0;
+  $('gi-cash').value=fmtAUD(cash);
+  $('growthOverlay').classList.add('open');
+  computeGrowth();
+}
+function closeOverlay(){ $('growthOverlay').classList.remove('open'); }
+$('openGrowthBtn').onclick=openOverlay;
+$('closeGrowthBtn').onclick=closeOverlay;
+$('growthOverlay').onclick=e=>{ if(e.target===$('growthOverlay')) closeOverlay(); };
+
+// ---------------------------
+// Tooltip System for Bars
+// ---------------------------
+const tooltip = document.createElement('div');
+tooltip.id = 'tooltip';
+tooltip.style.position = 'absolute';
+tooltip.style.background = '#111827';
+tooltip.style.color = '#fff';
+tooltip.style.fontSize = '12px';
+tooltip.style.padding = '6px 8px';
+tooltip.style.borderRadius = '6px';
+tooltip.style.pointerEvents = 'none';
+tooltip.style.opacity = 0;
+tooltip.style.transition = 'opacity 0.15s';
+tooltip.style.zIndex = 99999; // above overlays
+document.body.appendChild(tooltip);
+
+function attachBarTooltips() {
+  document.querySelectorAll('.bar-bg').forEach(bg => {
+    bg.addEventListener('mouseenter', () => {
+      tooltip.textContent = bg.dataset.tip || '';
+      tooltip.style.opacity = 1;
+    });
+    bg.addEventListener('mousemove', e => {
+      tooltip.style.left = `${e.pageX + 10}px`;
+      tooltip.style.top  = `${e.pageY - 28}px`;
+    });
+    bg.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = 0;
+    });
+  });
+}
+
+/* ---------------------------
+   Growth Computation
+----------------------------*/
+function computeGrowth() {
+  const cash = parseMoney($('gi-cash').value);
+  const rate = (+$('gi-rate').value || 0) / 100;
+  const term = (+$('gi-term').value || 0) / 12;
+  const gm = (+$('gi-gm').value || 0) / 100;
+
+  // Default multipliers (reset each session)
+  if (!window.sessionMultipliers)
+    window.sessionMultipliers = { Inventory: 2.0, Marketing: 3.5, Staff: 2.5, Capital: 1.8 };
+
+  const defaults = window.sessionMultipliers;
+
+  // --- Build sliders table
+  $('gi-rows-simple').innerHTML = Object.keys(defaults).map((u, i, arr) => {
+    const baseId = u.toLowerCase().substring(0, 3);
+    const sliderId = `alloc-${baseId}`;
+    const startAlloc = 100 / arr.length;
+    return `
+      <tr>
+        <td>${u}</td>
+        <td style="text-align:center;">
+          <input id="${sliderId}" type="range" min="0" max="100" step="1" value="${startAlloc}" class="alloc-slider">
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+            <span id="${sliderId}-val">${startAlloc.toFixed(0)}</span>%
+          </div>
+        </td>
+        <td class="right" id="${sliderId}-net">—</td>
+      </tr>`;
+  }).join('');
+
+  const sliders = Array.from(document.querySelectorAll('.alloc-slider'));
+
+  // --- Auto-balance logic
+  sliders.forEach(s => {
+    s.addEventListener('input', () => {
+      const others = sliders.filter(x => x !== s);
+      const totalBefore = sliders.reduce((t, x) => t + +x.value, 0);
+      const diff = totalBefore - 100;
+      if (Math.abs(diff) > 0.1 && others.length) {
+        const totalOthers = others.reduce((t, x) => t + +x.value, 0) || 1;
+        others.forEach(o => {
+          let newVal = +o.value - (diff * (+o.value / totalOthers));
+          newVal = Math.max(0, Math.min(100, newVal));
+          o.value = newVal;
+          $(`${o.id}-val`).textContent = Math.round(newVal);
+        });
+      }
+      $(`${s.id}-val`).textContent = s.value;
+      updateReturns();
+    });
+  });
+
+  // --- Recalculate returns and bars
+  function updateReturns() {
+    const rows = Object.keys(defaults).map(u => {
+      const baseId = u.toLowerCase().substring(0, 3);
+      const s = $(`alloc-${baseId}`);
+      const alloc = +s.value;
+      const allocCash = cash * (alloc / 100);
+      const mult = defaults[u];
+      const sales = allocCash * mult * term;
+      const cogs = sales * (1 - gm);
+      const fin = allocCash * rate * term;
+      const net = (sales - cogs) - fin;
+      $(`${s.id}-net`).textContent = fmtAUD(net);
+      $(`${s.id}-net`).style.color = net >= 0 ? 'var(--impact-text)' : '#ef4444';
+      return { use: u, alloc, net, allocCash, sales, cogs, fin, mult };
+    });
+
+    const totalAlloc = rows.reduce((s, r) => s + r.alloc, 0);
+    const totalNet = rows.reduce((s, r) => s + r.net, 0);
+
+    // Note text
+    $('alloc-note').innerHTML =
+      totalAlloc === 100
+        ? `✅ Total allocation balanced at 100%.`
+        : `ℹ️ Auto-balanced total = ${totalAlloc.toFixed(0)}%.`;
+
+    // Bars with detailed hover text
+    const maxVal = Math.max(1, ...rows.map(r => Math.abs(r.net)));
+    $('bars-simple').innerHTML = rows.map(r => {
+      const tip = 
+        `Cash used: ${fmtAUD(r.allocCash)} × Multiplier ${r.mult.toFixed(1)} = Sales ${fmtAUD(r.sales)}\n` +
+        `Less COGS ${fmtAUD(r.cogs)} and Finance ${fmtAUD(r.fin)} → Net Return ${fmtAUD(r.net)}`;
+      return `
+        <div class="bar-row">
+          <div class="bar-label">${r.use}</div>
+          <div class="bar-bg" data-tip="${tip}">
+            <div class="bar" style="width:${(Math.abs(r.net)/maxVal)*100}%"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+// --- Narrative summary (live rate + finance cost)
+if (cash > 0) {
+  const totalFinance = rows.reduce((s, r) => s + r.fin, 0); // sum of each row's finance
+  const topUses = rows
+    .sort((a, b) => b.alloc - a.alloc)
+    .filter(r => r.alloc > 0)
+    .slice(0, 3)
+    .map(r => r.use)
+    .join(', ');
+
+  const multiple = totalFinance > 0 ? (totalNet / totalFinance) : 0;
+
+  $('gi-summary').innerHTML = `
+    Using <b>${fmtAUD(cash)}</b> could generate up to 
+    <b>${fmtAUD(totalNet)}</b> net return 
+    (<span style="color:var(--accent);font-weight:600;">${topUses}</span>),
+    against finance cost of <b>${fmtAUD(totalFinance)}</b> —
+    a return of <b>${multiple.toFixed(1)}×</b>.
+  `;
+} else {
+  $('gi-summary').textContent = 'Enter a cash amount to see growth projections.';
+}
+
+    attachBarTooltips(); // reuse your tooltip system
+  }
+
+  updateReturns();
+}
+
+/* ---------------------------
+   Wiring Inputs & Init
+----------------------------*/
+['revenue','cogs','inventory','receivables','payables'].forEach(id=>wireMoney($(id)));
+['scenario-dio','scenario-dso','scenario-dpo','scenario-desc'].forEach(id=>$(id).addEventListener('input', updateAll));
+$('saveScenarioBtn').onclick=()=>{
+  const b=getBaseline(),m=calcMetrics(b);
+  const imp=calcImpact(m,b,+$('scenario-dio').value||0,+$('scenario-dso').value||0,+$('scenario-dpo').value||0);
+  scenarios.push({description:$('scenario-desc').value.trim()||'Scenario',newCCC:imp.newCCC,newWorkingCapital:imp.newWorkingCapital,cashFreed:imp.cashFreed});
+  $('scenario-dio').value=0;$('scenario-dso').value=0;$('scenario-dpo').value=0;$('scenario-desc').value='';activeQuick=null;
+  updateAll();
+};
+$('resetScenarioBtn').onclick=()=>{$('scenario-dio').value=0;$('scenario-dso').value=0;$('scenario-dpo').value=0;$('scenario-desc').value='';activeQuick=null;updateAll();};
+
+function updateAll(){
+  const b=getBaseline();
+  const m=calcMetrics(b);
+  updateKPIs(m);
+  renderQuickScenarios(m);
+  updateImpact(b,m);
+  renderScenariosTable(m);
+  updateGrossMargin(b);
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Tab' && e.repeat) {
+    e.preventDefault();
+  }
+});
+let trapListener = null;
+
+function openOverlay(){
+  const cash=lastImpact.cashFreed>0?lastImpact.cashFreed:0;
+  $('gi-cash').value=fmtAUD(cash);
+  $('growthOverlay').classList.add('open');
+  computeGrowth();
+
+  // Add focus trap
+  const panel = document.querySelector('.overlay .panel');
+  const focusable = Array.from(panel.querySelectorAll('button, input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'));
+  if (focusable.length) {
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    trapListener = e => {
+      if (e.key === 'Tab') {
+        const shift = e.shiftKey;
+        if (shift && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!shift && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', trapListener);
+    // Optional: focus the first element in the panel
+    first.focus();
+  }
+}
+
+function closeOverlay(){ 
+  $('growthOverlay').classList.remove('open');
+  if (trapListener) {
+    document.removeEventListener('keydown', trapListener);
+    trapListener = null;
+  }
+}
+
+// --- Multiplier popup control ---
+$('setMultipliersBtn').onclick = () => {
+  const m = window.sessionMultipliers;
+  $('multiplierFields').innerHTML = Object.keys(m).map(u =>
+    `<div class="input-group">
+       <label>${u} Multiplier</label>
+       <input id="mult-${u.toLowerCase().substring(0,3)}" type="number" value="${m[u]}" step="0.1"/>
+     </div>`
+  ).join('');
+  $('multiplierPopup').classList.add('open');
+};
+
+// --- Close on Cancel or Save ---
+$('cancelMultipliersBtn').onclick = () => $('multiplierPopup').classList.remove('open');
+
+$('saveMultipliersBtn').onclick = () => {
+  const fields = $('multiplierFields').querySelectorAll('input');
+  fields.forEach(f => {
+    const key = f.id.split('-')[1];
+    const name = {inv:'Inventory', mar:'Marketing', sta:'Staff', cap:'Capital'}[key];
+    window.sessionMultipliers[name] = +f.value || window.sessionMultipliers[name];
+  });
+  $('multiplierPopup').classList.remove('open');
+  computeGrowth(); // Refresh with updated multipliers
+};
+
+// Optional: close when clicking outside the panel
+$('multiplierPopup').addEventListener('click', e => {
+  if (e.target.id === 'multiplierPopup') $('multiplierPopup').classList.remove('open');
+});
+function setBusinessPreset(type) {
+  const presets = {
+    'Labour Hire':   { revenue: 20_000_000, cogs: 17_100_000, inventory: 0,        receivables: 2_000_000, payables: 300_000 },
+    'Transport':     { revenue: 9_000_000,  cogs: 7_000_000, inventory: 500_000,  receivables: 1_800_000, payables: 1_000_000 },
+    'Wholesale':     { revenue: 15_000_000, cogs: 10_800_000, inventory: 2_000_000, receivables: 2_500_000, payables: 1_800_000 },
+    'Manufacturing': { revenue: 20_000_000, cogs: 13_600_000, inventory: 3_000_000, receivables: 3_000_000, payables: 2_200_000 }
+  };
+
+  const p = presets[type];
+  if (!p) return;
+
+  // Fill the inputs
+  $('revenue').value     = fmtAUD(p.revenue);
+  $('cogs').value        = fmtAUD(p.cogs);
+  $('inventory').value   = fmtAUD(p.inventory);
+  $('receivables').value = fmtAUD(p.receivables);
+  $('payables').value    = fmtAUD(p.payables);
+
+  // Recalculate metrics and refresh displays
+  computeGrowth?.();
+  updateAll?.();
+
+  // Temporary feedback message
+  const msg = document.createElement('div');
+  msg.className = 'banner';
+  msg.textContent = `${type} metrics applied — Receivables ${fmtAUD(p.receivables)}, Revenue ${fmtAUD(p.revenue)}.`;
+  msg.style.cssText = "background:#f3f4f6;padding:6px 10px;margin-top:4px;border-left:4px solid var(--accent);font-size:13px;";
+  const container = document.getElementById('presetButtons');
+  container.insertAdjacentElement('afterend', msg);
+  setTimeout(()=>msg.remove(), 2500);
+}
+
+updateAll();
+</script>
+</body>
+</html>
